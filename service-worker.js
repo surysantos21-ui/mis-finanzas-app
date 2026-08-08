@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mis-finanzas-cache-v1';
+const CACHE_NAME = 'mis-finanzas-cache-v2';
 const URLS_TO_CACHE = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -19,6 +19,12 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    fetch(event.request)
+      .then((response) => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(()=>{});
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
